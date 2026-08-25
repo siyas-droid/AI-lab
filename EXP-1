@@ -1,0 +1,74 @@
+import time
+import threading
+reminders = []
+def check_reminders():
+    while True:
+        current_time = time.time()
+        for reminder in reminders:
+            if not reminder["reminded"]:
+                if current_time >= reminder["due_time"]:
+                    print("\n")
+                    print("TIME TO TAKE YOUR MEDICINE!")
+                    print("Medicine:", reminder["name"])
+                    print("\n")
+                    reminder["reminded"] = True
+
+        time.sleep(1)
+
+thread = threading.Thread(
+    target=check_reminders,
+    daemon=True
+)
+thread.start()
+print("\nMEDICINE REMINDER AGENT")
+while True:
+    print("1. Add Medicine")
+    print("2. View Medicines")
+    print("3. Exit")
+
+    choice = input("Enter your choice: ")
+    if choice == "1":
+        name = input("Enter medicine name: ")
+        minutes = float(
+            input("After how many minutes should I remind you? ")
+        )
+        due_time = time.time() + (minutes * 60)
+        reminder = {
+            "name": name,
+            "minutes": minutes,
+            "due_time": due_time,
+            "reminded": False
+        }
+        reminders.append(reminder)
+        print("\nMedicine reminder added!\n")
+
+    elif choice == "2":
+        if len(reminders) == 0:
+            print("\nNo medicines added.")
+        else:
+            print("\nMEDICINE LIST")
+            for i, reminder in enumerate(reminders):
+                if reminder["reminded"]:
+                    status = "Reminder completed"
+                else:
+                    remaining = (
+                        reminder["due_time"] - time.time()
+                    ) / 60
+                    if remaining < 0:
+                        remaining = 0
+                    status = (
+                        str(round(remaining, 2))
+                        + " minutes remaining"
+                    )
+                print(
+                    i + 1,
+                    ".",
+                    reminder["name"],
+                    "-",
+                    status
+                )
+    elif choice == "3":
+        print("\nMedicine Reminder Agent closed.")
+        break
+    else:
+        print("\nInvalid choice.")
